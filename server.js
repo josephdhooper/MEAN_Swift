@@ -2,50 +2,51 @@ var http = require('http'),
     express = require('express'),
     path = require('path'),
     MongoClient = require('mongodb').MongoClient,
-    Server = require('mongodb').Server,
+    assert = require('assert');
     CollectionDriver = require('./collectionDriver').CollectionDriver,
     FileDriver = require('./fileDriver').FileDriver; //<---
  
 var app = express();
-// app.set('port', process.env.PORT || 3000); 
+app.set('port', process.env.PORT || 3000); 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 // app.use(express.bodyParser()); // <-- add
 app.use(express.json());
 app.use(express.urlencoded()); 
 
-//app configuration
-var ipaddr = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
-var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+// if (env === 'development') {
+//   var mongoHost = 'localHost';
+//   var mongoPort = 27017;
 
-//mongodb configuration
-var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
-var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || 27017;
-var mongoUser = 'user'; //mongodb username
-var mongoPass = 'pass'; //mongodb password
-var mongoDb   = 'sampledb'; //mongodb database name
+// } else
 
-// var mongoHost = 'localHost';
-// var mongoPort = 27017;
+// var mongoHost = 'mongodb://jdhooper:funtimes3@ds121622.mlab.com:21622/mongodata';
+
+// }
+
 var fileDriver;  //<--
 var collectionDriver;
+
+var url = 'mongodb://localhost:27017';
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server.");
+  db.close();
+
+  });
+
+//new Connection
+var db = MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
  
-// var mongoClient = new MongoClient(new Server(mongoHost, mongoPort));
-// mongoClient.open(function(err, mongoClient) {
-//   if (!mongoClient) {
-//       console.error("Error! Exiting... Must start MongoDB first");
-//       process.exit(1);
-//   }
-//   var db = mongoClient.db("MyDatabase");
- 
-//   fileDriver = new FileDriver(db); //<--
-//   collectionDriver = new CollectionDriver(db);
-// });
+  fileDriver = new FileDriver(db); //<--
+  collectionDriver = new CollectionDriver(db);
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
  
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname + '/hello.html'));
+  res.sendFile(path.join(__dirname + '/index.html'));
 });
  
 app.post('/files', function(req,res) {fileDriver.handleUploadRequest(req,res);});
@@ -133,5 +134,6 @@ app.use(function (req,res) {
     res.render('404', {url:req.url});
 });
 
-app.listen(port, ipaddr);
-console.log('Server running at http://' + ipaddr + ':' + port + '/');
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});

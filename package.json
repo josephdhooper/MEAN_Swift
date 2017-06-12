@@ -8,8 +8,8 @@
     "mongodb": "^1.4.40"
   },
   "engine": {
-    "node": "*",
-    "npm": "*"
+    "npm": "5.0.x",
+    "node": "6.10.x"
   },
   "scripts": {
     "start": "node server.js"
