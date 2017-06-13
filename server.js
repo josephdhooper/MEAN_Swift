@@ -10,24 +10,27 @@ var app = express();
 app.set('port', process.env.PORT || 3000); 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-// app.use(express.bodyParser()); // <-- add
 app.use(express.json());
 app.use(express.urlencoded()); 
 
-// if (env === 'development') {
-//   var mongoHost = 'localHost';
-//   var mongoPort = 27017;
 
-// } else
+//Allows to test locally (in development) and in the Monogo Clound (MLAB). In the terminal, run "node server.js" to launch developmet. To launch the cloud server in production mode, use the following: "set NODE_ENV=production". 
 
-// var mongoHost = 'mongodb://jdhooper:funtimes3@ds121622.mlab.com:21622/mongodata';
+var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-// }
+if (env === 'development') {
+
+  var url = 'mongodb://localhost:27017';
+
+} else
+
+var url = 'mongodb://jdhooper:password123@ds121622.mlab.com:21622/mongodata';
+
 
 var fileDriver;  //<--
 var collectionDriver;
 
-var url = 'mongodb://localhost:27017';
+// var url = 'mongodb://jdhooper:password123@ds121622.mlab.com:21622/mongodata';
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server.");
